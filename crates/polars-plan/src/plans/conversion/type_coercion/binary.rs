@@ -494,6 +494,7 @@ pub(super) fn coerce_comparison_literal(
         // to 2026-01-01 00:00:00.000000999 to preserve the comparison behavior.
         let lit_casted_upper_equality_bound: Option<AnyValue<'static>> =
             match (lit_rhs.dtype(), lit_rhs_casted.as_any_value()) {
+                #[cfg(feature = "dtype-datetime")]
                 (
                     DataType::Datetime(TimeUnit::Milliseconds, _),
                     AnyValue::DatetimeOwned(phys_i64, tu, tz),
@@ -510,6 +511,7 @@ pub(super) fn coerce_comparison_literal(
                         tz,
                     ))
                 },
+                #[cfg(feature = "dtype-datetime")]
                 (
                     DataType::Datetime(TimeUnit::Microseconds, _),
                     AnyValue::DatetimeOwned(phys_i64, tu, tz),
@@ -526,6 +528,7 @@ pub(super) fn coerce_comparison_literal(
                         tz,
                     ))
                 },
+                #[cfg(feature = "dtype-duration")]
                 (DataType::Duration(TimeUnit::Milliseconds), AnyValue::Duration(phys_i64, tu)) => {
                     let unit_multiple: i64 = match tu {
                         TimeUnit::Milliseconds => 0,
@@ -538,6 +541,7 @@ pub(super) fn coerce_comparison_literal(
                         tu,
                     ))
                 },
+                #[cfg(feature = "dtype-duration")]
                 (DataType::Duration(TimeUnit::Microseconds), AnyValue::Duration(phys_i64, tu)) => {
                     let unit_multiple: i64 = match tu {
                         TimeUnit::Milliseconds => 0,
