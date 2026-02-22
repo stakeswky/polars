@@ -1030,6 +1030,11 @@ def test_comparison_literal_downcast_rewrites() -> None:
         assert search_str in plan.explain()
 
     assert_rewrite(
+        pl.col("i16") == pl.lit(10, dtype=pl.Int32),
+        'col("i16")) == (10)',
+    )
+
+    assert_rewrite(
         pl.col("datetime[ns]") == pl.lit(datetime(2026, 1, 1), dtype=pl.Datetime("ms")),
         "is_between([2026-01-01 00:00:00, 2026-01-01 00:00:00.000999999])",
     )
