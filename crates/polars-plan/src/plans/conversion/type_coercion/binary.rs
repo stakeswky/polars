@@ -454,7 +454,7 @@ pub(super) fn coerce_comparison_literal(
     }
 
     if supertype_introduces_nulls_on_lhs(dtype_lhs, &supertype) {
-        // Reject integer comparisons that cause lossy (valid->NULL) casts on the LHS.
+        // Reject integer comparisons that cast to a supertype that introduces NULLs on the LHS.
         // E.g. See below, the 2nd and 3rd row became NULL due to u128->i128 cast:
         // DataFrame(
         //     [
