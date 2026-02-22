@@ -566,7 +566,6 @@ pub(super) fn coerce_comparison_literal(
                     // E.g.
                     // In: datetime[ms] == 2026-01-01 (Date)
                     // Out: (datetime[ms]).is_between(2026-01-01 00:00:00.000, 2026-01-01 23:59:59.999, closed='both')
-
                     return {
                         #[cfg(feature = "is_between")]
                         {
