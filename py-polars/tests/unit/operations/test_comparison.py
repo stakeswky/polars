@@ -1083,7 +1083,7 @@ def test_comparison_literal_downcast_rewrites() -> None:
 
     assert_rewrite(
         pl.col("i16").eq_missing(-(1 << 16) - 1),
-        'false.repeat([col("i16").len()',
+        'false.repeat([col("i16").len()])',
     )
 
     assert_rewrite(
