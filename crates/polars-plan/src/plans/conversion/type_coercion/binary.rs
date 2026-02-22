@@ -364,7 +364,7 @@ pub(super) fn coerce_comparison_literal(
 ) -> Option<CmpLiteralRhsRewrite> {
     use CmpLiteralRhsRewrite::*;
 
-    macro_rules! finish_cmp_with_null_literal {
+    macro_rules! finish_rewrite_cmp_with_null_literal {
         () => {{
             let ir_boolean_function = match cmp_op {
                 Operator::EqValidity => IRBooleanFunction::IsNull,
@@ -407,7 +407,7 @@ pub(super) fn coerce_comparison_literal(
         && get_supertype(dtype_lhs, lit_rhs.dtype())
             .is_some_and(|supertype| !supertype_introduces_nulls_on_lhs(dtype_lhs, &supertype))
     {
-        finish_cmp_with_null_literal!();
+        finish_rewrite_cmp_with_null_literal!();
     }
 
     if dtype_lhs == lit_rhs.dtype() {
@@ -614,7 +614,7 @@ pub(super) fn coerce_comparison_literal(
         .ok()?
         .is_null()
     {
-        finish_cmp_with_null_literal!()
+        finish_rewrite_cmp_with_null_literal!()
     } else {
         // Since the literal is out of range it's either below min or above max. Determining the side
         // can be done by comparing against any in-range value (we pick 0).
