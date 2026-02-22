@@ -1653,7 +1653,7 @@ def test_scan_parquet_temporal_lit_comparison_skip_batch_24095_25731(
     df.write_parquet(f, row_group_size=2)
 
     q = pl.scan_parquet(f).filter(
-        pl.col("datetime[ns]") == pl.lit(datetime(2026, 1, 1, microsecond=0))
+        pl.col("datetime[ns]") == pl.lit(datetime(2026, 1, 1))
     )
 
     capfd.readouterr()
@@ -1681,7 +1681,7 @@ def test_scan_parquet_temporal_lit_comparison_skip_batch_24095_25731(
 
     q = pl.scan_parquet(f).filter(
         pl.col("datetime[ns]").is_between(
-            pl.lit(datetime(2026, 1, 1, microsecond=0)),
+            pl.lit(datetime(2026, 1, 1)),
             pl.lit(datetime(2026, 1, 1, microsecond=1)),
         )
     )
@@ -1713,7 +1713,7 @@ def test_scan_parquet_temporal_lit_comparison_skip_batch_24095_25731(
 
     q = pl.scan_parquet(f).filter(
         pl.col("datetime[ns]").is_between(
-            pl.lit(datetime(2026, 1, 1, microsecond=0)),
+            pl.lit(datetime(2026, 1, 1)),
             pl.lit(datetime(2026, 1, 1, microsecond=1)),
         )
     )
