@@ -398,8 +398,8 @@ pub(super) fn coerce_comparison_literal(
     }
 
     fn supertype_introduces_nulls_on_lhs(dtype_lhs: &DataType, supertype: &DataType) -> bool {
-        supertype != dtype_lhs
-            && dtype_lhs.is_integer()
+        dtype_lhs.is_integer()
+            && supertype != dtype_lhs
             && get_numeric_upcast_supertype_lossless(dtype_lhs, supertype).as_ref()
                 != Some(dtype_lhs)
     }
