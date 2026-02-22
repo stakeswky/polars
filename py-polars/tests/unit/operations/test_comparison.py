@@ -1022,6 +1022,7 @@ def test_comparison_literal_downcast_rewrites() -> None:
             "i16": pl.Int16,
             "u16": pl.UInt16,
             "datetime[ns]": pl.Datetime("ns"),
+            "str": pl.String,
         }
     )
 
@@ -1071,13 +1072,13 @@ def test_comparison_literal_downcast_rewrites() -> None:
     )
 
     assert_rewrite(
-        pl.col("i16").ne_missing(pl.lit(None, dtype=pl.Int16)),
-        'col("i16").is_not_null()',
+        pl.col("str").ne_missing(pl.lit(None, dtype=pl.Int16)),
+        'col("str").is_not_null()',
     )
 
     assert_rewrite(
-        pl.col("i16").ne_missing(None),
-        'col("i16").is_not_null()',
+        pl.col("str").ne_missing(None),
+        'col("str").is_not_null()',
     )
 
     assert_rewrite(
