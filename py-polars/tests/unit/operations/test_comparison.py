@@ -1072,7 +1072,7 @@ def test_comparison_literal_downcast_rewrites() -> None:
     )
 
     assert_rewrite(
-        pl.col("str").ne_missing(pl.lit(None, dtype=pl.Int16)),
+        pl.col("str").ne_missing(None),
         'col("str").is_not_null()',
     )
 
