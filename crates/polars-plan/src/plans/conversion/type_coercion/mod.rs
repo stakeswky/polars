@@ -243,7 +243,7 @@ impl OptimizationRule for TypeCoercionRule {
                 use CmpLiteralRhsRewrite::*;
 
                 use crate::plans::type_coercion::binary::{
-                    BoolValueAlways, CmpLiteralRhsRewrite, coerce_comparison_rhs_scalar,
+                    BoolValueAlways, CmpLiteralRhsRewrite, coerce_comparison_literal,
                 };
 
                 let [needle, low, high] = input.as_slice() else {
@@ -281,7 +281,7 @@ impl OptimizationRule for TypeCoercionRule {
                     use crate::plans::type_coercion::binary::BoolValueAlways;
 
                     if let LiteralValue::Scalar(lit) = lv.clone().materialize() {
-                        match unpack!(coerce_comparison_rhs_scalar(
+                        match unpack!(coerce_comparison_literal(
                             needle.node(),
                             &needle_dtype,
                             cmp_op_low,
@@ -315,7 +315,7 @@ impl OptimizationRule for TypeCoercionRule {
                     && let AExpr::Literal(lv) = high_ae
                 {
                     if let LiteralValue::Scalar(lit) = lv.clone().materialize() {
-                        match unpack!(coerce_comparison_rhs_scalar(
+                        match unpack!(coerce_comparison_literal(
                             needle.node(),
                             &needle_dtype,
                             cmp_op_high,

@@ -162,14 +162,14 @@ pub(super) fn process_binary(
         && let Some(rewrite) = (match (left, right) {
             (_, AExpr::Literal(lv)) => {
                 if let LiteralValue::Scalar(s) = lv.clone().materialize() {
-                    coerce_comparison_rhs_scalar(node_left, &type_left, op, s.clone(), expr_arena)
+                    coerce_comparison_literal(node_left, &type_left, op, s.clone(), expr_arena)
                 } else {
                     None
                 }
             },
             (AExpr::Literal(lv), _) => {
                 if let LiteralValue::Scalar(s) = lv.clone().materialize() {
-                    coerce_comparison_rhs_scalar(
+                    coerce_comparison_literal(
                         node_right,
                         &type_right,
                         op.swap_operands(),
@@ -355,7 +355,7 @@ pub(super) enum BoolValueAlways {
 
 /// Attempt to coerce a scalar RHS of a comparison to the dtype of the LHS.
 /// This can avoid a cast insertion, which can prevent filters from being applied in scans.
-pub(super) fn coerce_comparison_rhs_scalar(
+pub(super) fn coerce_comparison_literal(
     ae_node_left: Node,
     dtype_lhs: &DataType,
     cmp_op: Operator,
