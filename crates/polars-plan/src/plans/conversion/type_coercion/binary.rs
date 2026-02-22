@@ -295,7 +295,7 @@ pub(super) fn process_binary(
 
     // Coerce types:
     let st = unpack!(get_supertype(&type_left, &type_right));
-    let mut st = modify_supertype(st, &left, &right, &type_left, &type_right);
+    let mut st = modify_supertype(st, left, right, &type_left, &type_right);
 
     if is_cat_str_binary(&type_left, &type_right) {
         st = String
@@ -400,7 +400,7 @@ pub(super) fn coerce_comparison_literal(
     fn supertype_introduces_nulls_on_lhs(dtype_lhs: &DataType, supertype: &DataType) -> bool {
         supertype != dtype_lhs
             && dtype_lhs.is_integer()
-            && get_numeric_upcast_supertype_lossless(dtype_lhs, &supertype).is_none()
+            && get_numeric_upcast_supertype_lossless(dtype_lhs, supertype).is_none()
     }
 
     if lit_rhs.is_null()
@@ -428,9 +428,7 @@ pub(super) fn coerce_comparison_literal(
         return None;
     }
 
-    let Some(supertype) = get_supertype(dtype_lhs, lit_rhs.dtype()) else {
-        return None;
-    };
+    let supertype = get_supertype(dtype_lhs, lit_rhs.dtype())?;
 
     if !matching_and_supported_dtype_class(dtype_lhs, &supertype) {
         // Reject integer comparisons that compare as floats (e.g. Int64<>UInt64).
@@ -569,30 +567,40 @@ pub(super) fn coerce_comparison_literal(
                     // In: datetime[ms] == 2026-01-01 (Date)
                     // Out: (datetime[ms]).is_between(2026-01-01 00:00:00.000, 2026-01-01 23:59:59.999, closed='both')
 
-                    let upper_lit =
-                        Scalar::new(dtype_lhs.clone(), lit_casted_upper_equality_bound?);
-                    let node_high = expr_arena.add(AExpr::Literal(LiteralValue::Scalar(upper_lit)));
+                    return {
+                        #[cfg(feature = "is_between")]
+                        {
+                            let upper_lit =
+                                Scalar::new(dtype_lhs.clone(), lit_casted_upper_equality_bound?);
+                            let node_high =
+                                expr_arena.add(AExpr::Literal(LiteralValue::Scalar(upper_lit)));
 
-                    let node_low =
-                        expr_arena.add(AExpr::Literal(LiteralValue::Scalar(lit_rhs_casted)));
+                            let node_low = expr_arena
+                                .add(AExpr::Literal(LiteralValue::Scalar(lit_rhs_casted)));
 
-                    let function = IRFunctionExpr::Boolean(IRBooleanFunction::IsBetween {
-                        closed: ClosedInterval::Both,
-                    });
-                    let options = function.function_options();
+                            let function = IRFunctionExpr::Boolean(IRBooleanFunction::IsBetween {
+                                closed: ClosedInterval::Both,
+                            });
+                            let options = function.function_options();
 
-                    return Some(NewAExpr {
-                        aexpr: AExpr::Function {
-                            input: vec![
-                                ExprIR::from_node(ae_node_left, expr_arena),
-                                ExprIR::from_node(node_low, expr_arena),
-                                ExprIR::from_node(node_high, expr_arena),
-                            ],
-                            function,
-                            options,
-                        },
-                        output_constraint: None,
-                    });
+                            Some(NewAExpr {
+                                aexpr: AExpr::Function {
+                                    input: vec![
+                                        ExprIR::from_node(ae_node_left, expr_arena),
+                                        ExprIR::from_node(node_low, expr_arena),
+                                        ExprIR::from_node(node_high, expr_arena),
+                                    ],
+                                    function,
+                                    options,
+                                },
+                                output_constraint: None,
+                            })
+                        }
+                        #[cfg(not(feature = "is_between"))]
+                        {
+                            None
+                        }
+                    };
                 },
                 _ => {},
             }
@@ -664,7 +672,7 @@ pub(super) fn coerce_comparison_literal(
         })
     };
 
-    return Some(NewAExpr {
+    Some(NewAExpr {
         aexpr: AExpr::Ternary {
             predicate: left_not_null,
             truthy: expr_arena.add(AExpr::Literal(LiteralValue::Scalar(Scalar::new(
@@ -681,7 +689,7 @@ pub(super) fn coerce_comparison_literal(
         } else {
             BoolValueAlways::FalseOrNull
         }),
-    });
+    })
 }
 
 fn repeat_opt_bool_ae(value: Option<bool>, len_of: Node, expr_arena: &mut Arena<AExpr>) -> AExpr {

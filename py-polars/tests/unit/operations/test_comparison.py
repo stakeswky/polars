@@ -1066,7 +1066,17 @@ def test_comparison_literal_downcast_rewrites() -> None:
     )
 
     assert_rewrite(
+        pl.col("i16").eq_missing(None),
+        'col("i16").is_null()',
+    )
+
+    assert_rewrite(
         pl.col("i16").ne_missing(pl.lit(None, dtype=pl.Int16)),
+        'col("i16").is_not_null()',
+    )
+
+    assert_rewrite(
+        pl.col("i16").ne_missing(None),
         'col("i16").is_not_null()',
     )
 
@@ -1086,11 +1096,11 @@ def test_comparison_literal_downcast_rewrites() -> None:
     )
 
     assert_rewrite(
-        pl.col("u16").is_between(10, 1 << 16),
-        'col("u16")) >= (10)',
+        pl.col("u16").is_between(10, 1 << 16, closed="right"),
+        'col("u16")) > (10)',
     )
 
     assert_rewrite(
         pl.col("u16").is_between(1 << 16, 1 << 17),
-        ".is_not_null()).then(false).otherwise(null)",
+        'when(col("u16").is_not_null()).then(false).otherwise(null)',
     )
